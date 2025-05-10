@@ -13,15 +13,14 @@
     <!-- Category Filter -->
     <div class="mb-3">
         <div class="d-flex overflow-auto" style="gap: 0.5rem; scrollbar-width: thin;">
-            <button wire:click="setCategory('All Categories')" wire:key="category-all"
-                    class="btn btn-sm {{ $selectedCategory === 'All Categories' ? 'btn-primary' : 'btn-light' }} rounded-pill">
+            <button wire:click="setCategory('all')" wire:key="category-all"
+                    class="btn btn-sm {{ $selectedCategory === 'all' ? 'btn-primary' : 'btn-light' }} rounded-pill">
                 All Categories
             </button>
-
             @foreach ($categories as $category)
-                <button wire:click="setCategory('{{ $category }}')" wire:key="category-{{ $category }}"
-                        class="btn btn-sm {{ $selectedCategory === $category ? 'btn-primary' : 'btn-light' }} rounded-pill">
-                    {{ $category }}
+                <button wire:click="setCategory('{{ $category->id }}')" wire:key="category-{{ $category->id }}"
+                        class="btn btn-sm {{ $selectedCategory == $category->id ? 'btn-primary' : 'btn-light' }} rounded-pill">
+                    {{ $category->famille }}
                 </button>
             @endforeach
         </div>
@@ -30,15 +29,14 @@
     <!-- Brand Filter -->
     <div class="mb-4">
         <div class="d-flex overflow-auto" style="gap: 0.5rem; scrollbar-width: thin;">
-            <button wire:click="setBrand('All Brands')" wire:key="brand-all"
-                    class="btn btn-sm {{ $selectedBrand === 'All Brands' ? 'btn-primary' : 'btn-light' }} rounded-pill">
+            <button wire:click="setBrand('all')" wire:key="brand-all"
+                    class="btn btn-sm {{ $selectedBrand === 'all' ? 'btn-primary' : 'btn-light' }} rounded-pill">
                 All Brands
             </button>
-
             @foreach ($brands as $brand)
-                <button wire:click="setBrand('{{ $brand }}')" wire:key="brand-{{ $brand }}"
-                        class="btn btn-sm {{ $selectedBrand === $brand ? 'btn-primary' : 'btn-light' }} rounded-pill">
-                    {{ $brand }}
+                <button wire:click="setBrand('{{ $brand->id }}')" wire:key="brand-{{ $brand->id }}"
+                        class="btn btn-sm {{ $selectedBrand == $brand->id ? 'btn-primary' : 'btn-light' }} rounded-pill">
+                    {{ $brand->marque }}
                 </button>
             @endforeach
         </div>

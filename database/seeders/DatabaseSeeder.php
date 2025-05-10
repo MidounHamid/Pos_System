@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             UniteSeeder::class,        // First create units
             FamilleSeeder::class,      // Then create families (categories)
             MarqueSeeder::class,       // Then create brands
-            ProductSeeder::class,      // Finally create products
+            // ProductSeeder::class,   // supprimé car inutilisé
         ]);
     }
 }

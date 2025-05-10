@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Article;
+use App\Models\Famille;
+use App\Models\Marque;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Schema;
@@ -19,8 +21,8 @@ class ArticlesIndex extends Component
     public float $shippingCost = 0;
 
     // Filter properties
-    public $selectedCategory = 'All Categories';
-    public $selectedBrand = 'All Brands';
+    public $selectedCategory = 'all';
+    public $selectedBrand = 'all';
     public $search = '';
 
     public function handleAddToCart($articleId)
@@ -49,16 +51,16 @@ class ArticlesIndex extends Component
         $this->dispatch('cart-updated', items: $this->items);
     }
 
-    public function setCategory($category)
+    public function setCategory($categoryId)
     {
-        $this->selectedCategory = $category;
-        $this->resetPage(); // If you're using pagination
+        $this->selectedCategory = $categoryId;
+        $this->resetPage();
     }
 
-    public function setBrand($brand)
+    public function setBrand($brandId)
     {
-        $this->selectedBrand = $brand;
-        $this->resetPage(); // If you're using pagination
+        $this->selectedBrand = $brandId;
+        $this->resetPage();
     }
 
     public function getSubTotalProperty(): float
@@ -93,44 +95,17 @@ class ArticlesIndex extends Component
 
     public function render()
     {
-        // Check table structure and get filterable columns
-        $articleColumns = Schema::getColumnListing('articles');
-
-        // Define category and brand columns based on your actual table structure
-        $categoryColumn = in_array('categorie', $articleColumns) ? 'categorie' :
-                         (in_array('category', $articleColumns) ? 'category' : null);
-
-        $brandColumn = in_array('marque', $articleColumns) ? 'marque' :
-                      (in_array('brand', $articleColumns) ? 'brand' : null);
+        $categories = Famille::all();
+        $brands = Marque::all();
 
         $query = Article::query();
 
-        // Get categories and brands if the columns exist
-        $categories = collect();
-        $brands = collect();
-
-        if ($categoryColumn) {
-            $categories = Article::select($categoryColumn)
-                ->distinct()
-                ->whereNotNull($categoryColumn)
-                ->pluck($categoryColumn)
-                ->filter();
-
-            if ($this->selectedCategory !== 'All Categories' && $categoryColumn) {
-                $query->where($categoryColumn, $this->selectedCategory);
-            }
+        if ($this->selectedCategory !== 'all') {
+            $query->where('famille_id', $this->selectedCategory);
         }
 
-        if ($brandColumn) {
-            $brands = Article::select($brandColumn)
-                ->distinct()
-                ->whereNotNull($brandColumn)
-                ->pluck($brandColumn)
-                ->filter();
-
-            if ($this->selectedBrand !== 'All Brands' && $brandColumn) {
-                $query->where($brandColumn, $this->selectedBrand);
-            }
+        if ($this->selectedBrand !== 'all') {
+            $query->where('marque_id', $this->selectedBrand);
         }
 
         // Add search functionality
@@ -146,25 +121,16 @@ class ArticlesIndex extends Component
         // Or get all results
         $articles = $query->get();
 
-        // If no category/brand columns found, use some default values for the filter UI
-        if ($categories->isEmpty()) {
-            $categories = collect(['Fruits', 'Shoes', 'Jackets', 'Computer', 'T-shirts', 'Sunglass', 'EarPods']);
-        }
-
-        if ($brands->isEmpty()) {
-            $brands = collect(['Colorss', 'Lion Test', 'Laptop', 'A & S Company', 'Fruits', 'HP', 'trestllqa']);
-        }
-
         return view('livewire.articles-index', [
             'articles' => $articles,
             'categories' => $categories,
             'brands' => $brands,
+            'selectedCategory' => $this->selectedCategory,
+            'selectedBrand' => $this->selectedBrand,
             'discountAmount' => $this->discountAmount,
             'totalQty' => $this->totalQty,
             'subTotal' => $this->subTotal,
             'total' => $this->total,
-            'categoryColumn' => $categoryColumn,
-            'brandColumn' => $brandColumn,
         ]);
     }
 }
