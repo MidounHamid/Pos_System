@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Article;
+use Illuminate\Support\Facades\Session;
 
 class PanierIndex extends Component
 {
@@ -17,48 +18,32 @@ class PanierIndex extends Component
 
     public function mount()
     {
-        // Load cart from session when component initializes
-        $this->items = session()->get('panier', []);
+        // Use the same session key as ArticlesIndex
+        $this->items = session()->get('cart_items', []);
     }
 
     protected function saveToSession()
     {
-        // Save cart to session on every update
-        session()->put('panier', $this->items);
+        session()->put('cart_items', $this->items);
         session()->save(); // Force immediate save
-    }
-
-    // Add validation rules
-    protected $rules = [
-        'discountValue' => 'numeric|min:0',
-        'shippingCost' => 'numeric|min:0',
-    ];
-
-    public function updated($propertyName)
-    {
-        $this->validateOnly($propertyName);
-        // Save non-item changes to session
-        if(in_array($propertyName, ['discountValue', 'shippingCost', 'discountType'])) {
-            session()->put('panier_extra', [
-                'discountType' => $this->discountType,
-                'discountValue' => $this->discountValue,
-                'shippingCost' => $this->shippingCost
-            ]);
-        }
-    }
-
-    public function handleCartUpdate($items)
-    {
-        $this->items = $items;
-        $this->saveToSession(); // Add this line
     }
 
     public function clearCart()
     {
         $this->items = [];
-        session()->forget('panier');
+        session()->forget('cart_items');
         session()->forget('panier_extra');
-        $this->dispatch('cart-updated', items: $this->items);
+        session()->save();
+        // Dispatch event to both components
+        $this->dispatch('cart-updated', items: []);
+        // Force a page refresh to ensure clean state
+        $this->redirect(request()->header('Referer'));
+    }
+
+    public function handleCartUpdate($items)
+    {
+        $this->items = $items;
+        $this->saveToSession();
     }
 
     public function incrementQty($articleId)

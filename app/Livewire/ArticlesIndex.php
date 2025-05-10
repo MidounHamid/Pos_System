@@ -7,14 +7,14 @@ use App\Models\Famille;
 use App\Models\Marque;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Session;
 
 class ArticlesIndex extends Component
 {
     use WithPagination;
 
     // Existing properties
-    // 
+    //
     public array $items = [];
     public float $taxRate = 0;
     public string $discountType = 'fixed';
@@ -25,6 +25,12 @@ class ArticlesIndex extends Component
     public $selectedCategory = 'all';
     public $selectedBrand = 'all';
     public $search = '';
+
+    public function mount()
+    {
+        // Initialize items from session when component loads
+        $this->items = Session::get('cart_items', []);
+    }
 
     public function handleAddToCart($articleId)
     {
@@ -49,6 +55,39 @@ class ArticlesIndex extends Component
             ];
         }
 
+        $this->syncCart();
+    }
+
+    public function removeFromCart($articleId)
+    {
+        if (isset($this->items[$articleId])) {
+            unset($this->items[$articleId]);
+            $this->syncCart();
+        }
+    }
+
+    public function updateCartQuantity($articleId, $quantity)
+    {
+        if (isset($this->items[$articleId])) {
+            if ($quantity <= 0) {
+                unset($this->items[$articleId]);
+            } else {
+                $this->items[$articleId]['qty'] = $quantity;
+            }
+            $this->syncCart();
+        }
+    }
+
+    public function clearCart()
+    {
+        $this->items = [];
+        $this->syncCart();
+    }
+
+    private function syncCart()
+    {
+        Session::put('cart_items', $this->items);
+        Session::save(); // Force save the session
         $this->dispatch('cart-updated', items: $this->items);
     }
 
@@ -111,9 +150,9 @@ class ArticlesIndex extends Component
 
         // Add search functionality
         if (!empty($this->search)) {
-            $query->where(function($q) {
+            $query->where(function ($q) {
                 $q->where('designation', 'like', '%' . $this->search . '%')
-                  ->orWhere('code_barre', 'like', '%' . $this->search . '%');
+                    ->orWhere('code_barre', 'like', '%' . $this->search . '%');
             });
         }
 
