@@ -14,6 +14,7 @@ class ArticlesIndex extends Component
     use WithPagination;
 
     // Existing properties
+    // 
     public array $items = [];
     public float $taxRate = 0;
     public string $discountType = 'fixed';
