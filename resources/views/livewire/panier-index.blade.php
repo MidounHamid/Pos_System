@@ -30,7 +30,9 @@
                             <td class="text-end">${{ number_format($item['price'] * $item['qty'], 2) }}</td>
                             <td class="text-center">
                                 <button wire:click="deleteItem({{ $itemId }})"
-                                    class="btn btn-link text-danger p-0" title="Remove item">
+                                    class="btn btn-link text-danger p-0"
+                                    wire:loading.attr="disabled"
+                                    title="Remove item">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </td>
