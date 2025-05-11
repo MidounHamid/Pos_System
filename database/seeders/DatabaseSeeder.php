@@ -17,14 +17,14 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'name' => 'Test User',
-            'email' => 'test@example.com',
+            'email' => 'test' . uniqid() . '@example.com',
         ]);
 
         $this->call([
             UniteSeeder::class,        // First create units
             FamilleSeeder::class,      // Then create families (categories)
             MarqueSeeder::class,       // Then create brands
-            // ProductSeeder::class,   // supprimé car inutilisé
+            ArticleSeeder::class,      // Ajouté pour insérer des articles
         ]);
     }
 }
