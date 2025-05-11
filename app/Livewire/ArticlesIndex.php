@@ -14,7 +14,6 @@ class ArticlesIndex extends Component
     use WithPagination;
 
     // Existing properties
-    //
     public array $items = [];
     public float $taxRate = 0;
     public string $discountType = 'fixed';
@@ -26,9 +25,26 @@ class ArticlesIndex extends Component
     public $selectedBrand = 'all';
     public $search = '';
 
+    // Listen for cart update events from PanierIndex
+    protected $listeners = ['cart-updated' => 'refreshCart'];
+
     public function mount()
     {
         // Initialize items from session when component loads
+        $this->refreshCartFromSession();
+    }
+
+    public function refreshCart($items = null)
+    {
+        if ($items !== null) {
+            $this->items = $items;
+        } else {
+            $this->refreshCartFromSession();
+        }
+    }
+
+    protected function refreshCartFromSession()
+    {
         $this->items = Session::get('cart_items', []);
     }
 
@@ -44,6 +60,12 @@ class ArticlesIndex extends Component
             return;
         }
 
+        // Ensure we have fresh cart data
+        $this->refreshCartFromSession();
+
+        // Convert to int for proper array key matching
+        $articleId = (int) $articleId;
+
         if (isset($this->items[$articleId])) {
             $this->items[$articleId]['qty']++;
         } else {
@@ -55,39 +77,47 @@ class ArticlesIndex extends Component
             ];
         }
 
-        $this->syncCart();
+        $this->updateCartSession();
+    }
+
+    protected function updateCartSession()
+    {
+        Session::put('cart_items', $this->items);
+        Session::save(); // Force save the session
+        $this->dispatch('cart-updated', items: $this->items);
     }
 
     public function removeFromCart($articleId)
     {
+        // Convert to int for proper array key matching
+        $articleId = (int) $articleId;
+
         if (isset($this->items[$articleId])) {
             unset($this->items[$articleId]);
-            $this->syncCart();
+            $this->updateCartSession();
         }
     }
 
     public function updateCartQuantity($articleId, $quantity)
     {
+        // Convert to int for proper array key matching
+        $articleId = (int) $articleId;
+
         if (isset($this->items[$articleId])) {
             if ($quantity <= 0) {
                 unset($this->items[$articleId]);
             } else {
                 $this->items[$articleId]['qty'] = $quantity;
             }
-            $this->syncCart();
+            $this->updateCartSession();
         }
     }
 
     public function clearCart()
     {
         $this->items = [];
-        $this->syncCart();
-    }
-
-    private function syncCart()
-    {
-        Session::put('cart_items', $this->items);
-        Session::save(); // Force save the session
+        Session::forget('cart_items');
+        Session::save();
         $this->dispatch('cart-updated', items: $this->items);
     }
 
