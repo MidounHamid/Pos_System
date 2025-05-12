@@ -12,9 +12,10 @@ class PanierIndex extends Component
     public string $discountType = 'fixed';
     public float $discountValue = 0;
     public float $shippingCost = 0;
+    public array $heldOrders = [];
 
     // Listen for cart update events from ArticlesIndex
-    protected $listeners = ['cart-updated' => 'refreshCart'];
+    protected $listeners = ['cart-updated' => 'refreshCart', 'resume-order' => 'resumeOrder'];
 
     public function mount()
     {
@@ -23,6 +24,9 @@ class PanierIndex extends Component
 
         // Also load extra cart data
         $this->loadExtraData();
+
+        // Load held orders
+        $this->heldOrders = Session::get('held_orders', []);
     }
 
     // Refresh cart data from session
@@ -67,6 +71,59 @@ class PanierIndex extends Component
 
         Session::put('panier_extra', $extra);
         Session::save();
+    }
+
+    public function holdOrder()
+    {
+        if (!empty($this->items)) {
+            $order = [
+                'items' => $this->items,
+                'extra' => [
+                    'discountType' => $this->discountType,
+                    'discountValue' => $this->discountValue,
+                    'shippingCost' => $this->shippingCost
+                ],
+                'timestamp' => now()->format('Y-m-d H:i:s'),
+                'total' => $this->total
+            ];
+
+            $this->heldOrders[] = $order;
+            Session::put('held_orders', $this->heldOrders);
+            
+            // Clear current cart
+            $this->clearCart();
+            
+            // Reset extra data
+            $this->discountType = 'fixed';
+            $this->discountValue = 0;
+            $this->shippingCost = 0;
+            $this->saveExtraData();
+            
+            $this->dispatch('order-held');
+        }
+    }
+
+    public function resumeOrder($index)
+    {
+        if (isset($this->heldOrders[$index])) {
+            $order = $this->heldOrders[$index];
+            
+            // Restore cart items
+            $this->items = $order['items'];
+            Session::put('cart_items', $this->items);
+            
+            // Restore extra data
+            $this->discountType = $order['extra']['discountType'];
+            $this->discountValue = $order['extra']['discountValue'];
+            $this->shippingCost = $order['extra']['shippingCost'];
+            $this->saveExtraData();
+            
+            // Remove from held orders
+            array_splice($this->heldOrders, $index, 1);
+            Session::put('held_orders', $this->heldOrders);
+            
+            $this->dispatch('cart-updated', items: $this->items);
+        }
     }
 
     public function clearCart()
