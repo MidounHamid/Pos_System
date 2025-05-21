@@ -47,35 +47,42 @@
         <p>Current Filters: Category: {{ $selectedCategory }} | Brand: {{ $selectedBrand }}</p>
     </div>
 
-    <!-- Products Grid -->
     <div class="row">
         @foreach ($articles as $article)
         @if (isset($article->id, $article->designation, $article->prix_ht, $article->tva))
         <div class="col-md-3 mb-4">
-            <div class="card h-100 shadow-sm">
-                <img src="{{ $article->photo ? asset('storage/' . $article->photo) : asset('images/placeholder-product.png') }}"
-                    class="card-img-top img-fluid"
-                    style="height: 200px; object-fit: cover; background-color: #f8f9fa;"
-                    alt="{{ $article->designation }}">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title mb-2">{{ $article->designation }}</h5>
-                    <p class="card-text text-muted small mb-2">{{ $article->code_barre }}</p>
-
-                    <div class="mt-auto">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge bg-success fs-6">
-                                {{ number_format($article->prix_ht * (1 + $article->tva / 100), 2) }} €
-                            </span>
-                            <span class="text-muted small">
-                                {{ number_format($article->prix_ht * (1 + $article->tva / 100) * 0.925, 2) }} €/pièce
-                            </span>
-                        </div>
-                        <button wire:click="handleAddToCart({{ $article->id }})"
-                            class="btn btn-primary w-100">
-                            <i class="fas fa-cart-plus me-2"></i>
-                            Ajouter au panier
-                        </button>
+            <div class="card h-100 border-0 rounded-3 position-relative p-0 cursor-pointer"
+                 wire:click="handleAddToCart({{ $article->id }})"
+                 style="cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s ease;"
+                 onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 15px rgba(0,0,0,0.15)';"
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';"
+                 >
+                <!-- Price tag in top-left corner -->
+                <div class="position-absolute top-0 start-0 p-0 z-1">
+                    <div class="bg-primary text-white fw-bold py-1 px-2 rounded-start" style="border-top-right-radius: 0;">
+                        {{ $article->prix_ht }} DH
                     </div>
+                </div>
+
+                <!-- Volume tag in top-right corner -->
+                <div class="position-absolute top-0 end-0 p-0 z-1">
+                    <div class="bg-dark text-white fw-bold py-1 px-2 rounded-start" style="border-top-left-radius: 0;">
+                        {{ $article->stock }} {{ $article->unite->unite }}
+                    </div>
+                </div>
+
+                <div class="text-center p-3">
+                    <img src="{{ $article->photo ? asset('storage/' . $article->photo) : asset('images/placeholder-product.png') }}"
+                        class="img-fluid mx-auto d-block"
+                        style="height: 180px; object-fit: contain;"
+                        alt="{{ $article->designation }}">
+                </div>
+
+                <div class="card-body text-center p-2">
+                    <h5 class="card-title fw-bold mb-1">{{ $article->designation }}</h5>
+                    <p class="text-muted mb-1 small">{{ $article->famille->famille }}     <span class="text-blue-500">{{ strtolower($article->designation) }}</span>
+                    </p>
+                    <p class="text-muted small mb-2">{{ $article->code_barre }}</p>
                 </div>
             </div>
         </div>

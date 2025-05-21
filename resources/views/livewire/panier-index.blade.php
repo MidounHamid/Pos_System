@@ -26,8 +26,8 @@
                                         class="btn btn-sm btn-outline-secondary px-3">+</button>
                                 </div>
                             </td>
-                            <td class="text-end">${{ number_format($item['price'], 2) }}</td>
-                            <td class="text-end">${{ number_format($item['price'] * $item['qty'], 2) }}</td>
+                            <td class="text-end">{{ number_format($item['price'], 2) }} DH</td>
+                            <td class="text-end">{{ number_format($item['price'] * $item['qty'], 2) }} DH</td>
                             <td class="text-center">
                                 <button wire:click="deleteItem({{ (int) $itemId }})"
                                 class="btn btn-link text-danger p-0"
@@ -88,16 +88,16 @@
                             <dd class="col-6 text-end">{{ $totalQty }}</dd>
 
                             <dt class="col-6">Sub Total:</dt>
-                            <dd class="col-6 text-end">${{ number_format($subTotal, 2) }}</dd>
+                            <dd class="col-6 text-end">{{ number_format($subTotal, 2) }} DH</dd>
 
                             <dt class="col-6 text-danger">Discount:</dt>
-                            <dd class="col-6 text-end text-danger">-${{ number_format($discountAmount, 2) }}</dd>
+                            <dd class="col-6 text-end text-danger">{{ number_format($discountAmount, 2) }} DH</dd>
 
                             <dt class="col-6">Shipping:</dt>
-                            <dd class="col-6 text-end">${{ number_format($shippingCost, 2) }}</dd>
+                            <dd class="col-6 text-end">{{ number_format($shippingCost, 2) }} DH</dd>
 
                             <dt class="col-6 fw-bold">Grand Total:</dt>
-                            <dd class="col-6 text-end fw-bold">${{ number_format($total, 2) }}</dd>
+                            <dd class="col-6 text-end fw-bold">{{ number_format($total, 2) }} DH</dd>
                         </dl>
                     </div>
                 </div>

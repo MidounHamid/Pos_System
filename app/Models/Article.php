@@ -10,21 +10,21 @@ class Article extends Model
     use HasFactory;
     protected $guarded = ['id'];
 
-    public function familles()
+    public function famille()
     {
         return $this->belongsTo(Famille::class);
     }
 
-    public function marques()
+    public function marque()
     {
         return $this->belongsTo(Marque::class);
     }
 
-    public function unites()
+    public function unite()
     {
         return $this->belongsTo(Unite::class);
     }
-    public function details()
+    public function detail()
     {
         return $this->hasMany(Detail_bl::class);
     }

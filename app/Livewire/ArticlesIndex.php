@@ -168,7 +168,7 @@ class ArticlesIndex extends Component
         $categories = Famille::all();
         $brands = Marque::all();
 
-        $query = Article::query();
+        $query = Article::with('unite'); // Add this line to eager load the unite relationship
 
         if ($this->selectedCategory !== 'all') {
             $query->where('famille_id', $this->selectedCategory);
@@ -186,9 +186,6 @@ class ArticlesIndex extends Component
             });
         }
 
-        // Optional: Add pagination if needed
-        // $articles = $query->paginate(12);
-        // Or get all results
         $articles = $query->get();
 
         return view('livewire.articles-index', [
