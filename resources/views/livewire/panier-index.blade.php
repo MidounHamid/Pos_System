@@ -111,13 +111,49 @@
             </button>
 
             <div class="d-flex gap-2">
-                <button class="btn btn-secondary px-4">
+                <button wire:click="holdOrder" class="btn btn-secondary px-4" @if(empty($items)) disabled @endif>
                     <i class="fas fa-pause me-2"></i>Hold Order
                 </button>
-                <button class="btn btn-success px-4">
+                <button class="btn btn-success px-4" @if(empty($items)) disabled @endif>
                     <i class="fas fa-credit-card me-2"></i>Pay Now
                 </button>
             </div>
         </div>
+
+        @if(!empty($heldOrders))
+        <div class="mt-4">
+            <h5 class="mb-3"><i class="fas fa-clock me-2"></i>Held Orders</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Time</th>
+                            <th class="text-end">Items</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($heldOrders as $index => $order)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $order['timestamp'] }}</td>
+                            <td class="text-end">{{ count($order['items']) }}</td>
+                            <td class="text-end">${{ number_format($order['total'], 2) }}</td>
+                            <td class="text-center">
+                                <button wire:click="resumeOrder({{ $index }})" 
+                                    class="btn btn-sm btn-outline-primary" 
+                                    @if(!empty($items)) disabled title="Clear current cart first" @endif>
+                                    <i class="fas fa-shopping-cart me-1"></i>Resume
+                                </button>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
     </div>
 </div>
